@@ -1,0 +1,3 @@
+# Hydropnic Farming Monitoring System
+## Introduction
+Using ESP8266/ESP32 to collect data from the sensors, the data collected are uploaded to the Firebase Realtime Database. The data is then displayed on the web application using the Firebase Realtime Database API. The web application is hosted on the Netlify. The web application is also Progressive Web Application, so it can be installed on Desktop and mobile devices.
