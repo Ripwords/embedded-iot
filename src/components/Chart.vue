@@ -1,19 +1,20 @@
 <script lang="ts" setup>
-import Chart from 'chart.js/auto'
-import { Ref } from 'vue'
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js';
+import { Line } from 'vue-chartjs'
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement)
 
-const props = defineProps<{ config: any }>()
-const canvas = ref<any>(null)
-const chart = ref()
-const update = (chart: Ref<any>) => chart.value.update()
-defineExpose({ update })
-
-onMounted(() => {
-  const ctx = canvas.value.getContext('2d')
-  chart.value = new Chart(ctx, props.config)
+const props = defineProps({
+  chartData: {
+    type: Object as any,
+    required: true
+  },
+  options: {
+    type: Object,
+    required: true
+  }
 })
 </script>
 
 <template>
-  <canvas ref="canvas" />
+  <Line class="min-w-[250px] w-[35vw]" :data="props.chartData" :options="props.options" />
 </template>

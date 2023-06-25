@@ -26,17 +26,16 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAOczKFgRE_QjZBmdMDJsyN-vnQFicAvNY",
-  authDomain: "hydroponic-monitor.firebaseapp.com",
-  projectId: "hydroponic-monitor",
-  storageBucket: "hydroponic-monitor.appspot.com",
-  messagingSenderId: "464761357054",
-  appId: "1:464761357054:web:8ac5fa9c0898076c21dbaf",
-  measurementId: "G-LYTQ948YHD",
-  databaseURL: "https://hydroponic-monitor-default-rtdb.asia-southeast1.firebasedatabase.app"
+  apiKey: "AIzaSyCgWPzyjIapD0NSDfoQD1lSgfd2AJbCQqQ",
+  authDomain: "embedded-iot-7ef1f.firebaseapp.com",
+  databaseURL: "https://embedded-iot-7ef1f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "embedded-iot-7ef1f",
+  storageBucket: "embedded-iot-7ef1f.appspot.com",
+  messagingSenderId: "868537231321",
+  appId: "1:868537231321:web:4d51a73c0703f61de6dbc8"
 };
 
-const application = initializeApp(firebaseConfig)
+initializeApp(firebaseConfig)
 const pinia = createPinia()
 
 const app = createApp(App).use(IonicVue).use(pinia).use(router)

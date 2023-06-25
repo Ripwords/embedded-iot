@@ -18,13 +18,14 @@
     "ionicons": "^6.1.1",
     "pinia": "^2.0.29",
     "vue": "^3.2.45",
+    "vue-chartjs": "^5.2.0",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@iconify-json/ion": "^1.1.7",
     "@iconify-json/mdi": "^1.1.50",
     "@vitejs/plugin-vue": "^4.0.0",
-    "chart.js": "^4.2.0",
+    "chart.js": "^4.3.0",
     "netlify-plugin-pushover": "^0.1.1",
     "pwa-asset-generator": "^6.2.1",
     "typescript": "^4.9.3",

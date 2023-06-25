@@ -1,59 +1,69 @@
 <script lang="ts" setup>
 import { store } from '../store'
 import { isDesktop, formatTime, formatFullTime } from '@/functions/utility'
-import { useSessionStorage } from '@vueuse/core';
+import { useSessionStorage } from '@vueuse/core'
+import { getDatabase, set, ref as fb_ref, get, Database, DatabaseReference } from 'firebase/database'
+
+let db: Database = getDatabase()
+let dbRef: DatabaseReference
+
+const chartOption = (min: Number, max: Number) => {
+  return {
+    responsive: false,
+    maintainAspectRatio: true,
+    scales: {
+      y: {
+        min: min,
+        max: max
+      }
+    }
+  }
+}
 
 const table_width = isDesktop() ? "400px" : "330px"
 const table_color = "#1e1e1e"
 
-const props = defineProps({
-  index: {
-    type: Number,
-    required: true
-  }
-})
 const pinia = store()
-const currentLight = ref()
-const currentTemp = ref()
-const currentHumidity = ref()
-const currentPH = ref()
 const time = ref('')
 const full_time = ref('')
 const checkSensor = ref()
-const sensorStatus = useSessionStorage('sensorStatus' + String(props.index), false)
+const sensorStatus = useSessionStorage('sensorStatus', false)
 const localIP = ref('')
+const currentTemp = ref(0)
+const currentHumidity = ref(0)
+const timeList = ref()
+const tempList = ref()
+const humidityList = ref()
+const chartReady = ref(false)
 
-const updateData = (index: number) => {
-  if (Object.keys(pinia.data[index]).length > 0) {
-    currentLight.value = pinia.data[index].light['current']
-    currentTemp.value = pinia.data[index].temperature['current']
-    currentHumidity.value = pinia.data[index].humidity['current']
-    currentPH.value = pinia.data[index].ph['current']
-    time.value = formatTime(pinia.data[index].uptime)
-    full_time.value = formatFullTime(pinia.data[index].uptime)
-    localIP.value = pinia.data[index].localip
-    // const keys = Object.keys(pinia.data).filter((key) => key !== 'logging_interval')
-    // for (let i = 0; i < keys.length; i++) {
-    //   config.value[i] = {
-    //     type: 'line',
-    //     data: {
-    //       labels: Object.keys(pinia.data[keys[i]]).map(convertUnixToTime).slice(0, -1),
-    //       datasets: [
-    //         {
-    //           label: keys[i],
-    //           data: Object.values(pinia.data[keys[i]]).slice(0, -1),
-    //           backgroundColor: 'rgba(255, 99, 132, 0.2)',
-    //           borderColor: 'rgba(255, 99, 132, 1)',
-    //           borderWidth: 1,
-    //         },
-    //       ],
-    //     }
-    //   }
-    //   chartKeys.value[i] = -1 * chartKeys.value[i]
-    // }
+const heatToggle = () => {
+  dbRef = fb_ref(db, `${pinia.user.email.replace('.', '')}/heating`)
+  set(dbRef, !pinia.data.heating)
+}
+
+const coolToggle = () => {
+  dbRef = fb_ref(db, `${pinia.user.email.replace('.', '')}/cooling`)
+  set(dbRef, !pinia.data.cooling)
+}
+
+const updateData = () => {
+  if (Object.keys(pinia.data).length > 0) {
+    chartReady.value = true
+    time.value = formatTime(pinia.data.uptime)
+    full_time.value = formatFullTime(pinia.data.uptime)
+    localIP.value = pinia.data.localip
+    const log: any = Object.values(pinia.data.log).slice(-1)[0]
+    currentTemp.value = log.temp
+    currentHumidity.value = log?.humidity
+    timeList.value = Object.values(pinia.data.log).map((log: any) => {
+      const d = new Date(log.ts * 1000)
+      return `${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`
+    }).slice(-6)
+    tempList.value = Object.values(pinia.data.log).map((log: any) => log.temp).slice(-6)
+    humidityList.value = Object.values(pinia.data.log).map((log: any) => log.humidity).slice(-6)
   }
 }
-updateData(props.index)
+updateData()
 
 const checkSensorCallback = (time: number) => {
   // console.log("CHECK SENSOR START")
@@ -61,7 +71,7 @@ const checkSensorCallback = (time: number) => {
   const missedCount = ref(0)
 
   const intervalID = setInterval(() => {
-    if (pinia.data[props.index].uptime <= lastUpdateTime.value) {
+    if (pinia.data.uptime <= lastUpdateTime.value) {
       // console.log("Missed update, retrying...")
       missedCount.value += 1
     } else {
@@ -72,7 +82,7 @@ const checkSensorCallback = (time: number) => {
     if (missedCount.value > pinia.data.retry_value) {
       sensorStatus.value = false
     }
-    lastUpdateTime.value = pinia.data[props.index].uptime
+    lastUpdateTime.value = pinia.data.uptime
   }, pinia.data.logging_interval * 1000 + 1000)
 
   const clearCheckTime = () => {
@@ -82,22 +92,21 @@ const checkSensorCallback = (time: number) => {
   return { clearCheckTime }
 }
 
-const updateFirmware = () => {
-  if (sensorStatus.value) {
-    window.open(`http://${pinia.data[props.index].localip}/update`, '_blank')
-  }
-}
-
-checkSensor.value = checkSensorCallback(pinia.data[props.index].uptime)
+checkSensor.value = checkSensorCallback(pinia.data.uptime)
 
 watch(() => pinia.data, () => {
-  updateData(props.index)
+  updateData()
+})
+
+watch(() => pinia.data.heating, () => {
+  dbRef = fb_ref(db, `${pinia.user.email.replace('.', '')}/heating`)
+  set(dbRef, pinia.data.heating)
 })
 
 watch([() => pinia.data.logging_interval, () => pinia.data.retry_value], () => {
   console.log("RESET CHECK SENSOR")
   checkSensor.value.clearCheckTime()
-  checkSensor.value = checkSensorCallback(pinia.data[props.index].uptime)
+  checkSensor.value = checkSensorCallback(pinia.data.uptime)
 })
 
 onUnmounted(() => {
@@ -110,16 +119,13 @@ onUnmounted(() => {
     <ion-card>
       <ion-card-header>
         <ion-card-title>
-          <div class="flex justify-between mt-[-5px]">
+          <div class="flex justify-between mt-[-15px]">
             <h3>
-              Monitor {{ props.index + 1 }}
-              <ion-chip @click="updateFirmware" v-if="localIP" :color="sensorStatus ? 'primary' : 'medium'">
+              Monitor
+              <ion-chip v-if="localIP" :color="sensorStatus ? 'primary' : 'medium'">
                 <span class="mr-1">
                   {{ localIP }}
                 </span>
-                <ion-label>
-                  <i-mdi:file-upload-outline />
-                </ion-label>
               </ion-chip>
               <ion-chip v-else color="danger">unknown</ion-chip>
             </h3>
@@ -138,24 +144,51 @@ onUnmounted(() => {
             <tr>
               <th>Sensors</th>
               <th>Values</th>
+              <th>Graph</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>pH</td>
-              <td>{{ currentPH }}</td>
-            </tr>
-            <tr>
               <td>Humidity</td>
               <td>{{ currentHumidity }}%</td>
+              <td>
+                <Chart v-if="chartReady" :chartData="{
+                  labels: timeList,
+                  datasets: [
+                    {
+                      data: humidityList,
+                      borderColor: 'rgb(75, 192, 192)',
+                      tension: 0.1
+                    }
+                  ]
+                }" :options="chartOption(50, 100)" />
+              </td>
             </tr>
             <tr>
               <td>Temperature</td>
               <td>{{ currentTemp }}&deg;C</td>
+              <td>
+                <Chart v-if="chartReady" :chartData="{
+                  labels: timeList,
+                  datasets: [
+                    {
+                      data: tempList,
+                      borderColor: 'rgb(75, 192, 192)',
+                      tension: 0.1
+                    }
+                  ]
+                }" :options="chartOption(20, 45)" />
+              </td>
             </tr>
             <tr>
-              <td>Light Intensity</td>
-              <td>{{ Number(currentLight / 40.95).toFixed(2) }}%</td>
+              <td>Heating System</td>
+              <td><ion-toggle :enable-on-off-labels="true" :value="pinia.data.heating" @click="heatToggle"></ion-toggle>
+              </td>
+            </tr>
+            <tr>
+              <td>Cooling System</td>
+              <td><ion-toggle :enable-on-off-labels="true" :value="pinia.data.cooling" @click="coolToggle"></ion-toggle>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -173,13 +206,6 @@ onUnmounted(() => {
   transform: translateY(-50%);
   position: relative;
   margin-top: 0.125rem;
-  padding: 0.35rem 0.45rem;
-}
-
-.ip {
-  top: 50%;
-  transform: translateY(-50%);
-  position: relative;
   padding: 0.35rem 0.45rem;
 }
 
