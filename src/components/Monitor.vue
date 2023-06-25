@@ -36,19 +36,11 @@ const tempList = ref()
 const humidityList = ref()
 const chartReady = ref(false)
 
-const heatToggle = () => {
-  dbRef = fb_ref(db, `${pinia.user.email.replace('.', '')}/heating`)
-  set(dbRef, !pinia.data.heating)
-}
-
-const coolToggle = () => {
-  dbRef = fb_ref(db, `${pinia.user.email.replace('.', '')}/cooling`)
-  set(dbRef, !pinia.data.cooling)
-}
-
 const updateData = () => {
   if (Object.keys(pinia.data).length > 0) {
-    chartReady.value = true
+    if (chartReady.value === false) {
+      chartReady.value = true
+    }
     time.value = formatTime(pinia.data.uptime)
     full_time.value = formatFullTime(pinia.data.uptime)
     localIP.value = pinia.data.localip
@@ -98,15 +90,20 @@ watch(() => pinia.data, () => {
   updateData()
 })
 
+watch([() => pinia.data.logging_interval, () => pinia.data.retry_value], () => {
+  console.log("RESET CHECK SENSOR")
+  checkSensor.value.clearCheckTime()
+  checkSensor.value = checkSensorCallback(pinia.data.uptime)
+})
+
 watch(() => pinia.data.heating, () => {
   dbRef = fb_ref(db, `${pinia.user.email.replace('.', '')}/heating`)
   set(dbRef, pinia.data.heating)
 })
 
-watch([() => pinia.data.logging_interval, () => pinia.data.retry_value], () => {
-  console.log("RESET CHECK SENSOR")
-  checkSensor.value.clearCheckTime()
-  checkSensor.value = checkSensorCallback(pinia.data.uptime)
+watch(() => pinia.data.cooling, () => {
+  dbRef = fb_ref(db, `${pinia.user.email.replace('.', '')}/cooling`)
+  set(dbRef, pinia.data.cooling)
 })
 
 onUnmounted(() => {
@@ -182,12 +179,12 @@ onUnmounted(() => {
             </tr>
             <tr>
               <td>Heating System</td>
-              <td><ion-toggle :enable-on-off-labels="true" :value="pinia.data.heating" @click="heatToggle"></ion-toggle>
+              <td><ion-toggle :enable-on-off-labels="true" v-model="pinia.data.heating"></ion-toggle>
               </td>
             </tr>
             <tr>
               <td>Cooling System</td>
-              <td><ion-toggle :enable-on-off-labels="true" :value="pinia.data.cooling" @click="coolToggle"></ion-toggle>
+              <td><ion-toggle :enable-on-off-labels="true" v-model="pinia.data.cooling"></ion-toggle>
               </td>
             </tr>
           </tbody>
