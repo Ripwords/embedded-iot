@@ -8,12 +8,6 @@ export const appPages = [
     mdIcon: homeSharp
   },
   {
-    title: 'Guide',
-    url: '/menu/guide/',
-    iosIcon: bookOutline,
-    mdIcon: bookSharp
-  },
-  {
     title: 'Settings',
     url: '/menu/settings/',
     iosIcon: settingsOutline,
