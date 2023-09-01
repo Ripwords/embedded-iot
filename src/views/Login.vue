@@ -56,7 +56,7 @@ watch(enter, (v) => {
       <cDiv>
         <ion-card>
           <ion-card-content>
-            <img src="/LoginLogo.png" alt="logo" width="100" height="100">
+            <img src="/Logo.png" alt="logo" width="100" height="100">
           </ion-card-content>
         </ion-card>
       </cDiv>

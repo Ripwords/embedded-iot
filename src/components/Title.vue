@@ -7,7 +7,7 @@ const router = useRouter()
 <template>
   <ion-header :translucent="true">
     <ion-toolbar>
-      <ion-title class="hover:cursor-pointer" @click="router.replace('/menu/home')">Embedded IoT</ion-title>
+      <ion-title class="hover:cursor-pointer" @click="router.replace('/menu/home')">Smart Animal Farm</ion-title>
     </ion-toolbar>
   </ion-header>
 </template>

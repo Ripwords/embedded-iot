@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 export const store = defineStore('store', {
   state: () => ({
     user: {} as any,
-    GOOGLE_SIGN_IN: false,
+    GOOGLE_SIGN_IN: true,
     data: {} as any,
     position: "top" as "top" | "bottom" | "middle",
     uptimeFormat: useStorage('uptimeFormat', false),

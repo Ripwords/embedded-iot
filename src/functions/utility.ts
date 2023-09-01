@@ -55,7 +55,7 @@ export const initDB = async (email: string, pinia: any) => {
   const db = getDatabase()
   email = email.replace('.', '')
   const dbRef = ref(db, `${email}/`)
-  onValue(dbRef, (snapshot) => {
+  onValue(dbRef, (snapshot: any) => {
     const data = snapshot.val()
     pinia.data = data
   })
@@ -64,13 +64,17 @@ export const initDB = async (email: string, pinia: any) => {
 export const signInGoogle = async (router: any) => {
   const provider = new GoogleAuthProvider()
   const auth = getAuth()
-  if (!isDesktop) {
-    await signInWithRedirect(auth, provider)
-  } else {
-    const result = await signInWithPopup(auth, provider)
-    if (result !== undefined) {
-      router.replace('/menu')
-    }
+  // if (!isDesktop) {
+  //   await signInWithRedirect(auth, provider)
+  // } else {
+  //   const result = await signInWithPopup(auth, provider)
+  //   if (result !== undefined) {
+  //     router.replace('/menu')
+  //   }
+  // }
+  const result = await signInWithPopup(auth, provider)
+  if (result !== undefined) {
+    router.replace('/menu')
   }
 }
 
