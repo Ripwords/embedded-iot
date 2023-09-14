@@ -140,16 +140,13 @@ onUnmounted(() => {
           <thead>
             <tr>
               <th>Sensors</th>
-              <th>Values</th>
-              <th>Graph</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Humidity</td>
-              <td>{{ currentHumidity }}%</td>
               <td>
-                <Chart v-if="chartReady" :chartData="{
+                <ion-label>Humidity: {{ currentHumidity }}%</ion-label>
+                <Chart class="mt-4" v-if="chartReady" :chartData="{
                   labels: timeList,
                   datasets: [
                     {
@@ -162,10 +159,9 @@ onUnmounted(() => {
               </td>
             </tr>
             <tr>
-              <td>Temperature</td>
-              <td>{{ currentTemp }}&deg;C</td>
               <td>
-                <Chart v-if="chartReady" :chartData="{
+                Temperature: {{ currentTemp }}&deg;C
+                <Chart class="mt-4" v-if="chartReady" :chartData="{
                   labels: timeList,
                   datasets: [
                     {
@@ -177,18 +173,32 @@ onUnmounted(() => {
                 }" :options="chartOption(20, 45)" />
               </td>
             </tr>
-            <tr>
-              <td>Heating System</td>
-              <td><ion-toggle :enable-on-off-labels="true" v-model="pinia.data.heating"></ion-toggle>
-              </td>
-            </tr>
-            <tr>
-              <td>Cooling System</td>
-              <td><ion-toggle :enable-on-off-labels="true" v-model="pinia.data.cooling"></ion-toggle>
-              </td>
-            </tr>
           </tbody>
         </table>
+        <br>
+        <br>
+        <cDiv>
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>System(s)</th>
+                <th>Toggle</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Heating</td>
+                <td><ion-toggle :enable-on-off-labels="true" v-model="pinia.data.heating"></ion-toggle>
+                </td>
+              </tr>
+              <tr>
+                <td>Cooling</td>
+                <td><ion-toggle :enable-on-off-labels="true" v-model="pinia.data.cooling"></ion-toggle>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </cDiv>
       </ion-card-content>
     </ion-card>
   </cDiv>
