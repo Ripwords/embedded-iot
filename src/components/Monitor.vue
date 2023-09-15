@@ -31,6 +31,12 @@ const sensorStatus = useSessionStorage('sensorStatus', false)
 const localIP = ref('')
 const currentTemp = ref(0)
 const currentHumidity = ref(0)
+const totalChickens = ref(0);
+const totalPigs = ref(0);
+const deceasedChickens = ref(0);
+const deceasedPigs = ref(0);
+const soldChicken = ref(0);
+const soldPigs = ref(0);
 const timeList = ref()
 const tempList = ref()
 const humidityList = ref()
@@ -44,9 +50,15 @@ const updateData = () => {
     time.value = formatTime(pinia.data.uptime)
     full_time.value = formatFullTime(pinia.data.uptime)
     localIP.value = pinia.data.localip
+    totalChickens.value = pinia.data.num_chickens
+    totalPigs.value = pinia.data.num_pigs
     const log: any = Object.values(pinia.data.log).slice(-1)[0]
     currentTemp.value = log.temp
     currentHumidity.value = log?.humidity
+    deceasedChickens.value = log?.deceased_chicken
+    deceasedPigs.value = log?.decereased_pigs
+    soldChicken.value = log?.sold_chicken
+    soldPigs.value = log?.sold_pigs
     timeList.value = Object.values(pinia.data.log).map((log: any) => {
       const d = new Date(log.ts * 1000)
       return `${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`
@@ -180,6 +192,30 @@ onUnmounted(() => {
         <cDiv>
           <table class="styled-table">
             <thead>
+              <th>Animals</th>
+              <th>Number in Farm</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Total Chickens</td>
+                <td>
+                  <ion-input class="ion-text-center" type="number" v-model="totalChickens" />
+                </td>
+              </tr>
+              <tr>
+                <td>Total Pigs</td>
+                <td>
+                  <ion-input class="ion-text-center" type="number" v-model="totalPigs"></ion-input>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </cDiv>
+        <br>
+        <br>
+        <cDiv>
+          <table class="styled-table">
+            <thead>
               <tr>
                 <th>System(s)</th>
                 <th>Toggle</th>
@@ -208,6 +244,12 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+ion-input {
+  .text-input {
+    text-align: center;
+  }
+}
+
 .uptime {
   top: 50%;
   transform: translateY(-50%);
